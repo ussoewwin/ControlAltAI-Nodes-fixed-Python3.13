@@ -10,11 +10,11 @@ The original ControlAltAI-Nodes stopped working with Python 3.13, so this versio
 
 All node class names and display names have been changed from the original repository. Here is the complete list of changes:
 
-### Node Class Name Changes
+### Node Class Name and Display Name Changes
 
-| Original (本家) | Changed (Python 3.13版) | Display Name (Original) | Display Name (Changed) |
-|----------------|------------------------|------------------------|------------------------|
-| FluxResolutionNode | **MegapixelCalculatorNode** | Flux Resolution Calc | ControlAltAI: Megapixel Calculator |
+| Original Node Class Name | Changed Node Class Name | Original Display Name | Changed Display Name |
+|-------------------------|------------------------|----------------------|---------------------|
+| FluxResolutionNode | MegapixelCalculatorNode | Flux Resolution Calc | ControlAltAI: Megapixel Calculator |
 | FluxSampler | FluxSampler | Flux Sampler | ControlAltAI: Advanced Sampler |
 | FluxUnionControlNetApply | FluxUnionControlNetApply | Flux Union ControlNet Apply | ControlAltAI: Union ControlNet Apply |
 | BooleanBasic | BooleanBasic | Boolean Basic | ControlAltAI: Boolean Basic |
