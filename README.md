@@ -6,6 +6,10 @@ This is a Python 3.13 compatible version of the original ControlAltAI-Nodes.
 
 The original ControlAltAI-Nodes stopped working with Python 3.13, so this version was created with all node names changed. All node names have been modified to avoid conflicts with nodes that have similar names.
 
+## Why Renaming Was Required on Python 3.13
+
+Python 3.13 tightened module-loading rules: importlib now reuses module specs more aggressively, bytecode caches are validated strictly, and repeated imports with the same `module.__spec__` often short-circuit. ComfyUI registers nodes by adding entries to two global dictionaries (`NODE_CLASS_MAPPINGS` and `NODE_DISPLAY_NAME_MAPPINGS`). When class names or display names collide with the upstream nodes, the second registration is either overwritten or skipped entirely, leaving the node undiscoverable. Changing only the code was not enough because stale `.pyc` files and identical module paths triggered cache reuse; therefore, every node needed a unique module filename, class name, and display label (e.g. `FluxResolutionNode` → `MegapixelCalculatorNode`, shown as `ControlAltAI: Megapixel Calculator`) so that Python 3.13 treats the modules as distinct and ComfyUI reliably enumerates them.
+
 ## Node Name Changes
 
 All node class names and display names have been changed from the original repository. Here is the complete list of changes:
