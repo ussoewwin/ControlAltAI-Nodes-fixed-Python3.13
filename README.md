@@ -8,7 +8,17 @@ The original ControlAltAI-Nodes stopped working with Python 3.13, so this versio
 
 ## Why Renaming Was Required on Python 3.13
 
-Python 3.13 tightened module-loading rules: importlib now reuses module specs more aggressively, bytecode caches are validated strictly, and repeated imports with the same `module.__spec__` often short-circuit. ComfyUI registers nodes by adding entries to two global dictionaries (`NODE_CLASS_MAPPINGS` and `NODE_DISPLAY_NAME_MAPPINGS`). When class names or display names collide with the upstream nodes, the second registration is either overwritten or skipped entirely, leaving the node undiscoverable. Changing only the code was not enough because stale `.pyc` files and identical module paths triggered cache reuse; therefore, every node needed a unique module filename, class name, and display label (e.g. `FluxResolutionNode` → `MegapixelCalculatorNode`, shown as `ControlAltAI: Megapixel Calculator`) so that Python 3.13 treats the modules as distinct and ComfyUI reliably enumerates them.
+Python 3.13 tightened several internals around module loading and cache validation. ComfyUI discovers custom nodes by letting each extension import its modules and append entries to two global dictionaries: `NODE_CLASS_MAPPINGS` (class name → implementation) and `NODE_DISPLAY_NAME_MAPPINGS` (class name → UI label). As soon as a class name or display name collides with one already registered, the late-arriving module either overwrites the existing entry or the registration is skipped altogether, leaving the node missing from the UI. On earlier Python releases that collision was often benign; on 3.13 it translates into nodes silently disappearing.
+
+The main reasons are:
+
+- **Stricter importlib reuse.** Python 3.13 aggressively reuses module specs. When two modules share the same `module.__spec__`, the second import short-circuits and its body never executes, so the calls that should register nodes never run.
+
+- **Bytecode cache enforcement.** Stale `.pyc` files are now rejected immediately. If two files keep the same path (for example `flux_resolution_cal_node.py`), the cached bytecode from one version is reused for the other. When timestamps or hashes disagree, the import fails and the node is absent.
+
+- **Global key collisions in ComfyUI.** The ComfyUI catalogue builder assumes display names are unique. Multiple “Flux Resolution Calc” entries confuse the UI catalogue generation and cause the duplicates to be dropped even if the import succeeded.
+
+To guarantee that every node survives Python 3.13’s stricter semantics, this fork renames the modules, the classes, and the display labels (e.g. `FluxResolutionNode` → `MegapixelCalculatorNode`, shown to users as `ControlAltAI: Megapixel Calculator`). File names were updated so cached bytecode and `module.__spec__` entries no longer collide. The top-level `__init__.py` was also rewritten to support relative and absolute imports, emit a diagnostic log, and avoid accidental double-registration. With those changes in place, Python 3.13 treats each node module as distinct, and ComfyUI reliably enumerates them.
 
 ## Node Name Changes
 
